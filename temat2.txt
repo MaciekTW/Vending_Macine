@@ -1,0 +1,105 @@
+=======================ETAP II=============================================================================================================================================================================
+
+Sposoby płatności blik karta oraz cash dziedziczą po klasie platnosc i są przechowywane jako atrybuty kolejnej klasy, która ułatwia ich wyświetlanie ( w zależności od dostępnych sposobów płątności)
+
+Dodałem również klase Maintenance, w której umieściłem funkcję, któwych wywołanie powinno być możliwe z każdego miejsca kodu (w etapie I te funkcje był zadeklarowane w klasie Machine)
+
+void machine::christmasGift( std::string name, int pos )
+{
+    if( rand() / ( RAND_MAX + 1.0 ) < 0.4 && amount[ pos ] > 0 )
+    {
+        std::cout << "You have won a free extra bottle of " << name << " Merry X-mas!\n";
+        amount[ pos ]--;
+    } else
+        return;
+}
+
+Jest to funkcja odpowiedzialna za okreslanie sztucznego prawdopodobienstwa możliwości wygrania drugiego napoju z okazji świąt
+-Losujemy dowolnego inta i dzielimy przez maksymalną możliwą do osiągnięcia wartość, co powinno dać nam liczbę z przedziało (0;1)
+-Jeśli wylosowana liczba jest mniejsza od 0.4(co w przybliżeniu daje 40 procent szans) (i w sklepie jest jest dostepny dany produkt) odbiorca wygrywa darmowy napój
+
+    for( int j = 0; j < price.length(); j++ )
+    {
+        if( price[ j ] == '.' )
+        {
+            priceReady += price[ j ];
+            priceReady += price[ j + 1 ];
+            priceReady += price[ j + 2 ];
+            break;
+        } else if( price[ j ] != '.' )
+        {
+            counter1++;
+        }
+        priceReady += price[ j ];
+    }
+
+Funkcja odpowiedzialna za ładne formatowanie ceny do 2 miejsc po przecinku, w celu wypisywania jej w GUI automatu.
+-Jeśli natrafiamy na kropkę dodajemy kolejne 3 elementy stringa (kropka i dwie liczby po przecinku)
+
+    if( counter1 == 1 )
+    {
+        priceReady.pop_back();
+        priceReady.insert( 0, " " );
+        priceReady.push_back( ' ' );
+    }
+-Jeśli liczba ma przed precinkiem 1 liczbę usuwamy zero, któe znajduje się na końcu ceny i zamieniamy je na spacje(puste miejsce), puste miejsce dodajemy też na początku stringa
+- Ma to na celu ładne wyśrodkowanie ceny w okienku automatu ( 0 z końca ceny zawsze możemy bezkarnie usunąć gdzyć automat jako najmniejszy nominał przyjmuje 10 groszy)
+
+*************************Lista wszystkich(chyba) zmian względem etapu 1*************************
+
++Dodano klasę Maintenance odpowiedzialną za czyszczenie buffora, wyświetlanie komunikatów oraz czyszczenie ekranu
++Dodano klasę płatność, która przechowuje wysokość pozostałej opłaty za zakup oraz funkcje do manipulacji ceną
++Dodano klase BLIK
+    - Zawiera Funkcje odpowiedzialne za opłate za pośrednictwem blika
+    - Dodano GUI telefonu z którego odczytujemy wygenerowano przypadkowy kod BLIK
+    - Dodano funkcję odpowiedzialną za generowanei kodu BLIK
++Dodano klasę Cash
+    - Zawiera funkcję przeniesioną z klasy Machine odpowiedzialną za opłacenie należności gotówką
++Dodano klasę Karta (nazwa narzucona w temacie projketu dlatego po polsku)
+    -- Zawiera funkcję przeniesioną z klasy Machine odpowiedzialną za opłacenie należności Kartą
++Dodano świąteczną promocję w której można wygrać darmowy napój
++Zmieniono wygląd automatu na świąteczny
++Dodano graficzny komunikat o błędzie w trakcie procesu zapłaty
++Dodano graficzne pożegnanie po zakończeniu programu
++Dodano okienko automatu odpowiedzialne za wyświetlanie należności
++Zmieniono sposób wyświetlania stron z -1 i -2 na < oraz >
++Dodano nowe napoje w celu pokazania poprawnego działania kolejnych stron automatu
+
+
+
+========================ETAP I========================================================================================================================================================================
+Projekt składa się z 2 klas, klasy automatu(machine.cpp) oraz klasy napoju(drink.cpp)
+
+Klasa automat odpowiada za przechowywanie i sprzezdaż obiektów klasy drink a także za tworzenie interfejsu użytkownika.
+
+Automat do momentu zamówienia błędnej pozycji lub do wyjścia z niego po udanym zakupie
+
+Program wyswietla na ekranie naszkicowany automat, wraz z możliwymi do zakupu napojami, puste miejsca w automacie są oznaczone napisem EMPTY SLOT
+
+Automat może przechowywać 16 produktów na każdej stronie strony można zmieniać wpisując w momencie wyboru ID -1 lub -2
+
+Za drukowanie automatu odpowiada funkcja print void print( drink *stock, int size, std::string id="-"), a także przeładowana funkcja prywatna print - która służy do drukowania niestandarwoych elementów automatu (jakich jam klawiatura oraz wybrane ID),
+w wyświetlaniu automatu przydatny jest również przełądowany operator << klasy drink, dzięki któremu w sposób czytelny wypisujemy dane.
+
+===Opis funkcji print===
+
+-Najbardziej zagmatwana funkcja w projekcie, odpowiada za wypisywanie produktów i rysowanie automatu,
+
+-jako argumenty przyjmuje tablice z napojami, jej rozmiar oraz string o nazwie id
+
+-W przypadku, kiedy nie jest zamówiony żaden napój, string ID przyjmuje domyślną wartość "-",
+
+-w przypadku kiedy napój jest zamówiony wartość ta ulega zmianie na numer indeksu pod którym znajduje się zamówiony napój (ponieważ id jest numerem konwertujemy je do stringa) //prykład wywołania w funckji change()
+
+-std::cout << std::fixed; używamy aby zawsze 2 miejsca po precinku wypisywać w cenie nawet jeśli po przecinku jest 3.4 wypiszemy 3.40 ( bez fixed liczyłyby się dwa miejsca nie po precinku ale w ogóle.)
+
+-int pos = 16 * ( page - 1 ); dzięki tej linii tworze kolejne strony, numer strony jest zmiennąklasy machine domyślnie ustawioną na jeden a więc 1 strona wyświetli napoje na indeskach od 0 do 15 druga od 16 do 31 itd...
+
+- std::string hash = ( i >= KEYPAD_START && i < KEYPAD_STOP ) ? print( index, id ): "|###################|"; - jeśli znajdujemy się na linii o indeksie nieregularnym(takiej linii na której powinno pojawić domyślne |###################| wywołujemy prełąwodanąfunckje print )
+
+- preładowana funckja print odpowiada za zwracanie stringa z nieregularną linią, a także za umieszczanie id zamówionego produktu w menu wyboru;
+
+
+NAjlepiej testować w konsoli zewnętrznej a nie w cLion wtedy ładniej wygląda
+
+==========================================================================================================================================================================================
